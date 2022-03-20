@@ -9,7 +9,7 @@ Created on Fri Mar 18 15:00:00 2022
 import numpy as np
 import cv2
 import math
-from Node import Node
+import Node
 from queue import PriorityQueue
 
 def line(p1, p2, x, y, t):
@@ -154,7 +154,7 @@ def create_map():
     return map_
 
 
-def getStartNode(map_):
+def getStartNode():
     """
     Gets the start node from the user.
 
@@ -169,22 +169,22 @@ def getStartNode(map_):
     while not flag:
         start_node = [int(item) for item in input("\n Please enter the start node: ").split(',')]
         start_node[1] = 250 - start_node[1]
-        if (len(start_node) == 2 and (0 <= start_node[0] <= 400) and (0 <= start_node[1] <= 250)):
-            if not isObstacle(start_node,map_):
+        if (len(start_node) == 3 and (0 <= start_node[0] <= 400) and (0 <= start_node[1] <= 250)):
+            if not isObstacle(start_node):
                 flag = True
             else:   
                 print("Start node collides with obstacle \n")
         else:
             print("The input node location does not exist in the map_, please enter a valid start node.\n")
             flag = False
-    orientation = int(input("\n Please enter initial orientation: "))
-    if (orientation > 360):
-        orientaion = orientation % 360   
+    # orientation = int(input("\n Please enter initial orientation: "))
+    # if (orientation > 360):
+    #     orientaion = orientation % 360   
       
-    return start_node, orientation
+    return start_node
 
 
-def getGoalNode(map_):
+def getGoalNode():
     """
     Gets the goal node from the user.
 
@@ -199,8 +199,8 @@ def getGoalNode(map_):
     while not flag:
         goal_node = [int(item) for item in input("\n Please enter the goal node: ").split(',')]
         goal_node[1] = 250 - goal_node[1]
-        if (len(goal_node) == 2 and (0 <= goal_node[0] <= 400) and (0 <= goal_node[1] <= 250)):
-            if not isObstacle(goal_node,map_):
+        if (len(goal_node) == 3 and (0 <= goal_node[0] <= 400) and (0 <= goal_node[1] <= 250)):
+            if not isObstacle(goal_node):
                 flag = True
             else:
                 print("Goal node collides with obstacle \n")
@@ -208,11 +208,12 @@ def getGoalNode(map_):
             print("The input node location does not exist in the map_, please enter a valid goal node.\n")
             flag = False
     
-    orientation = int(input("\n Please enter initial orientation: "))
-    if (orientation > 360):
-        orientaion = orientation % 360  
+    # orientation = int(input("\n Please enter initial orientation: "))
+    # if (orientation > 360):
+    #     orientaion = orientation % 360  
         
-    return goal_node, orientation
+    return goal_node
+
 
 def getData():
     
@@ -236,7 +237,92 @@ def Euclidean(current, goal):
     
     return cost
 
-def explore(node, L, angle):
+
+def ActionMoveCC60(node, L, angle):
+    x = node.x
+    y = node.y
+    cur_angle = node.angle
+    new_angle = (cur_angle + 2 * angle) % 360
+    
+    new_x = int(np.round(x + L * np.cos(np.radians(new_angle))))
+    new_y = int(np.round(y + L * np.sin(np.radians(new_angle))))
+    
+    move = (new_x, new_y, new_angle)
+    cost = L 
+    
+    return [move,cost]
+
+
+def ActionMoveCC30(node, L, angle):
+    x = node.x
+    y = node.y
+    cur_angle = node.angle
+    new_angle = (cur_angle + angle) % 360
+    
+    new_x = int(np.round(x + L * np.cos(np.radians(new_angle))))
+    new_y = int(np.round(y + L * np.sin(np.radians(new_angle))))
+    
+    move = (new_x, new_y, new_angle)
+    cost = L 
+    
+    return [move,cost]    
+
+
+def ActionMoveStraight(node, L, angle):
+    x = node.x
+    y = node.y
+    cur_angle = node.angle
+    new_angle = (cur_angle) % 360
+    
+    new_x = int(np.round(x + L * np.cos(np.radians(new_angle))))
+    new_y = int(np.round(y + L * np.sin(np.radians(new_angle))))
+    
+    move = (new_x, new_y, new_angle)
+    cost = L 
+    
+    return [move,cost]   
+ 
+    
+def ActionMoveC30(node, L, angle):
+    x = node.x
+    y = node.y
+    cur_angle = node.angle
+    new_angle = (cur_angle - angle) % 360
+    
+    new_x = int(np.round(x + L * np.cos(np.radians(new_angle))))
+    new_y = int(np.round(y + L * np.sin(np.radians(new_angle))))
+    
+    move = (new_x, new_y, new_angle)
+    cost = L 
+    
+    return [move,cost]  
+ 
+def ActionMoveC60(node, L, angle):
+    x = node.x
+    y = node.y
+    cur_angle = node.angle
+    new_angle = (cur_angle - 2 * angle) % 360
+    
+    new_x = int(np.round(x + L * np.cos(np.radians(new_angle))))
+    new_y = int(np.round(y + L * np.sin(np.radians(new_angle))))
+    
+    move = (new_x, new_y, new_angle)
+    cost = L 
+    
+    return [move,cost]   
+
+
+def isGoal(current, goal, threshold = 50):
+    
+    distance = Euclidean(current, goal)
+    
+    if (distance < threshold):
+        return True
+    else:
+        return False
+
+    
+def explore(node, L = 5, angle = 30):
     """
     Explores the neighbors of the current node and performs move action.
 
@@ -253,9 +339,6 @@ def explore(node, L, angle):
         Action performed node, cost of movement.
 
     """
-    x = node.x
-    y = node.y
-    angle = node.angle
 
     moves = [ActionMoveCC60(node, L, angle),
              ActionMoveCC30(node, L, angle),
@@ -265,92 +348,13 @@ def explore(node, L, angle):
     
     valid_paths = []
     for move in moves:
-        if not isObstacle(tuple(move[0])):
-            valid_paths.append([move[0],move[1]])
+        if (move[0][0] > 0 and move[0][0] < 400 and move[0][1] > 0 and move[0][1] < 250):
+            if not isObstacle(move[0]):
+                valid_paths.append([move[0],move[1]])
 
     return valid_paths
 
-def ActionMoveCC60(node, L, angle):
-    x = node.x
-    y = node.y
-    cur_angle = node.angle
-    new_angle = cur_angle + 2 * angle
-    
-    new_x = x + L * np.cos(np.radians(new_angle))
-    new_y = y + L * np.sin(np.radians(new_angle))
-    
-    move = (new_x, new_y)
-    cost = L 
-    
-    return [move,cost]
 
-
-def ActionMoveCC30(node, L, angle):
-    x = node.x
-    y = node.y
-    cur_angle = node.angle
-    new_angle = cur_angle + angle
-    
-    new_x = x + L * np.cos(np.radians(new_angle))
-    new_y = y + L * np.sin(np.radians(new_angle))
-    
-    move = (new_x, new_y)
-    cost = L 
-    
-    return [move,cost]    
-
-
-def ActionMoveStraight(node, L, angle):
-    x = node.x
-    y = node.y
-    cur_angle = node.angle
-    new_angle = cur_angle 
-    
-    new_x = x + L * np.cos(np.radians(new_angle))
-    new_y = y + L * np.sin(np.radians(new_angle))
-    
-    move = (new_x, new_y)
-    cost = L 
-    
-    return [move,cost]   
-  
-def ActionMoveC30(node, L, angle):
-    x = node.x
-    y = node.y
-    cur_angle = node.angle
-    new_angle = cur_angle - angle
-    
-    new_x = x + L * np.cos(np.radians(new_angle))
-    new_y = y + L * np.sin(np.radians(new_angle))
-    
-    move = (new_x, new_y)
-    cost = L 
-    
-    return [move,cost]  
- 
-def ActionMoveC60(node, L, angle):
-    x = node.x
-    y = node.y
-    cur_angle = node.angle
-    new_angle = cur_angle - 2 * angle
-    
-    new_x = x + L * np.cos(np.radians(new_angle))
-    new_y = y + L * np.sin(np.radians(new_angle))
-    
-    move = (new_x, new_y)
-    cost = L 
-    
-    return [move,cost]   
-
-def isGoal(current, goal, threshold):
-    
-    distance = Euclidean(current, goal)
-    
-    if (distance < threshold):
-        return True
-    else:
-        return False
-  
     
 def Dijkstra(start_node, goal_node, map):
     """
@@ -378,11 +382,13 @@ def Dijkstra(start_node, goal_node, map):
     visited = set([])                                                                # Set conataining visited nodes
     node_objects = {}                                                                # dictionary of nodes
     distance = {}                                                                    # distance 
+    theta = 30
     
     # Assign costs for all nodes to a large value
     for i in range(0, map.shape[1]):
         for j in range(0, map.shape[0]):
-            distance[str([i,j])] = 9999999
+            for k in range(0,360,theta):
+                distance[str(([i,j],k))] = 9999999
     
     distance[str(start_node)] = 0                                                    # Start node has cost of 0
     visited.add(str(start_node))                                                     # Add start node to visited list
@@ -390,35 +396,39 @@ def Dijkstra(start_node, goal_node, map):
     node_objects[str(node.pos)] = node                                               # Assigning the node value in dictionary
     q.put([node.cost, node.pos])                                                     # Inserting the start node in priority queue
 
+    counter = 0
     while not q.empty():                                                             # Iterate until the queue is empty
         node_temp = q.get()                                                          # Pop node from queue
         node = node_objects[str(node_temp[1])]  
+        print(counter)
                                      
-        # Check of the node is the goal node
-        if node_temp[1][0] == goal_node[0] and node_temp[1][1] == goal_node[1]:      
+        # Check if the node is the goal node
+        if isGoal(tuple(node_temp[1][0:2]), tuple(goal_node[0:2])):    
             print(" Goal Reached!!!\n")
             node_objects[str(goal_node)] = Node.Node(goal_node,node_temp[0], node)
             break
         
-        for next_node, cost in explore(node,map):                                    # Explore neighbors
+        for next_node, cost in explore(node):                                        # Explore neighbors
 
             if str(next_node) in visited:                                            # Check if action performed next node is already visited
-                cost_temp = cost + distance[str(node.pos)]                           # Cost to come
+                cost_temp = cost + distance[str(node.pos)] + Euclidean(tuple(node.pos[0:2]), tuple(goal_node[0:2]))                          # Cost to come
                 if cost_temp < distance[str(next_node)]:                             # Update cost
                     distance[str(next_node)] = cost_temp
                     node_objects[str(next_node)].parent = node
 
             else:                                                                    # If next node is not visited
                 visited.add(str(next_node))
-                absolute_cost = cost + distance[str(node.pos)]
+                absolute_cost = cost + distance[str(node.pos)] + Euclidean(tuple(node.pos[0:2]), tuple(goal_node[0:2]))
                 distance[str(next_node)] = absolute_cost
                 new_node = Node.Node(next_node, absolute_cost, node_objects[str(node.pos)])
                 node_objects[str(next_node)] = new_node
                 q.put([absolute_cost, new_node.pos])
 
+        counter += 1
     return node_objects
 
 img = create_map()
+
 cv2.imshow("image", img)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
