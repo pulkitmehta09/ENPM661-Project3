@@ -562,17 +562,16 @@ def Astar(start_node, goal_node, map, c, r, L, angle):
             for k in range(0, 360, angle):
                 distance[str(([i,j],k))] = 9999999
     
-    distance[str(start_node)] = Euclidean(tuple(start_node[0:2]), tuple(goal_node[0:2]))                                                    # Start node has cost of 0
+    distance[str(start_node)] = Euclidean(tuple(start_node[0:2]), tuple(goal_node[0:2]))                                                    
     visited.add(str(start_node))                                                     # Add start node to visited list
     node = Node.Node(start_node,0,None)                                              # Create instance of Node
     node_objects[str(node.pos)] = node                                               # Assigning the node value in dictionary
     q.put((node.cost, node.pos))                                                     # Inserting the start node in priority queue
 
-    counter = 0
     
     while not q.empty(): 
         # if counter == 2:
-        #     break                                                            # Iterate until the queue is empty
+        #     break                                                                  # Iterate until the queue is empty
         node_temp = q.get()                                                          # Pop node from queue
         node = node_objects[str(node_temp[1])]  
         # print(counter)
@@ -580,26 +579,24 @@ def Astar(start_node, goal_node, map, c, r, L, angle):
         # Check if the node is the goal node
         if isGoal(tuple(node_temp[1][0:2]), tuple(goal_node[0:2]), r):    
             print(" Goal Reached!!!\n")
-            print(counter) 
             node_objects[str(goal_node)] = Node.Node(goal_node,node_temp[0], node)
             break
         
         for next_node, cost in explore(node, c, r, L, angle):                                        # Explore neighbors
-            if str(next_node) in visited:                                            # Check if action performed next node is already visited
+            if str(next_node) in visited:                                                            # Check if action performed next node is already visited
                 cost_temp = cost + distance[str(node.pos)] - Euclidean(tuple(node.pos[:2]), tuple(goal_node[:2]))
-                if cost_temp < distance[str(next_node)]:                             # Update cost
+                if cost_temp < distance[str(next_node)]:                                             # Update cost
                     distance[str(next_node)] = cost_temp
                     node_objects[str(next_node)].parent = node
                     
-            else:                                                                    # If next node is not visited
+            else:                                                                                    # If next node is not visited
                 visited.add(str(next_node))
                 absolute_cost = cost + distance[str(node.pos)] + Euclidean(tuple(next_node[:2]), tuple(goal_node[:2])) - Euclidean(tuple(node.pos[:2]), tuple(goal_node[:2]))
                 distance[str(next_node)] = absolute_cost
                 new_node = Node.Node(next_node, absolute_cost, node_objects[str(node.pos)])
                 node_objects[str(next_node)] = new_node
                 q.put((absolute_cost, new_node.pos))
-                        
-        counter += 1
+  
     return node_objects
 
 
@@ -683,7 +680,7 @@ def Animate(node_objects, path, map):
         cv2.line(img,(path[i-1][0],path[i-1][1]),(path[i][0],path[i][1]),(0,255,255),1)
         video.write(img)
 
-    for i in range(500):
+    for i in range(500):                                                             # To show the final frame for a longer time.                                                                    
         video.write(img)
             
     
@@ -721,6 +718,7 @@ def initialize():
     THIS PROGRAM USES A* ALGORITHM FOR SEARCHING A PATH FROM USER DEFINED START AND GOAL LOCATION IN A GIVEN MAP FOR A RIGID ROBOT.
     
     --------------------------------------------------------------------------------------------------------------------
+    
     -> The user needs to enter the data for clearance, robot radius, step-size(stride) and angle step-size.
     
     -> Then, the user provides the coordinates of the start and goal node according to the format given below:
