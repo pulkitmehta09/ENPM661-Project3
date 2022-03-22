@@ -182,17 +182,16 @@ def getStartNode(c, r):
     while not flag:
         start_node = [int(item) for item in input("\n Please enter the start node: ").split(',')]
         start_node[1] = 250 - start_node[1]
+        if (start_node[2] > 360):
+            start_node[2] = start_node[2] % 360
         if (len(start_node) == 3 and (0 <= start_node[0] <= 400) and (0 <= start_node[1] <= 250)):
             if not isObstacle(start_node, c, r):
                 flag = True
             else:   
                 print("Start node collides with obstacle \n")
         else:
-            print("The input node location does not exist in the map_, please enter a valid start node.\n")
+            print("The input node location does not exist in the map, please enter a valid start node.\n")
             flag = False
-    # orientation = int(input("\n Please enter initial orientation: "))
-    # if (orientation > 360):
-    #     orientaion = orientation % 360   
       
     return start_node
 
@@ -219,18 +218,16 @@ def getGoalNode(c, r):
     while not flag:
         goal_node = [int(item) for item in input("\n Please enter the goal node: ").split(',')]
         goal_node[1] = 250 - goal_node[1]
+        if (goal_node[2] > 360):
+            goal_node[2] = goal_node[2] % 360
         if (len(goal_node) == 3 and (0 <= goal_node[0] <= 400) and (0 <= goal_node[1] <= 250)):
             if not isObstacle(goal_node, c, r):
                 flag = True
             else:
                 print("Goal node collides with obstacle \n")
         else:
-            print("The input node location does not exist in the map_, please enter a valid goal node.\n")
+            print("The input node location does not exist in the map, please enter a valid goal node.\n")
             flag = False
-    
-    # orientation = int(input("\n Please enter initial orientation: "))
-    # if (orientation > 360):
-    #     orientaion = orientation % 360  
         
     return goal_node
 
@@ -677,15 +674,18 @@ def Animate(node_objects, path, map):
     for key in node_objects.keys():
         current_node = node_objects[key]
         if (current_node.parent != None):
-            cv2.line(img,(current_node.parent.x,current_node.parent.y),(current_node.x,current_node.y),(0,255,0))
+            cv2.line(img,(current_node.parent.x,current_node.parent.y),(current_node.x,current_node.y),(100,200,50))
             video.write(img)
-    
-           
+               
     for i in range(len(path) - 1):                                                   # Add generated path to video frame 
         if (i==0):
             continue
-        cv2.line(img,(path[i-1][0],path[i-1][1]),(path[i][0],path[i][1]),(255,0,0),1)
+        cv2.line(img,(path[i-1][0],path[i-1][1]),(path[i][0],path[i][1]),(0,255,255),1)
         video.write(img)
+
+    for i in range(500):
+        video.write(img)
+            
     
     video.release()
     print(" Animation video saved.")
@@ -732,24 +732,4 @@ def initialize():
     (Note: Only comma seperated values are allowed)
     --------------------------------------------------------------------------------------------------------------------
     """)
-
-
-
-
-initialize()
-
-clearance, radius, StepSize, angle = getData()
-map_ = create_map(clearance, radius)
-
-
-
-start_node = getStartNode(clearance, radius)
-goal_node = getGoalNode(clearance, radius)
-
-nodes = Astar(start_node, goal_node, map_, clearance, radius, StepSize, angle)
-node_objects, path = GeneratePath(nodes, goal_node)
-
-Animate(node_objects, path, map_)
-
-
 
