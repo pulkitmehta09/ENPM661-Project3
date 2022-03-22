@@ -1,5 +1,5 @@
 # ENPM-661 Project 3: A* Algorithm
-# Author: Pulkit Mehta (UID: 117551693) 
+## Author: Pulkit Mehta (UID: 117551693) 
 
 INSTRUCTIONS:
 
