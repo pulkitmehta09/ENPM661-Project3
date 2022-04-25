@@ -74,7 +74,7 @@ def main():
     Parser.add_argument('--End', default="[9,9,0]", help='Goal location')
     Parser.add_argument('--RobotRadius', default=0.177, help='Robot radius')
     Parser.add_argument('--Clearance', default=0.05, help='Clearance')
-    Parser.add_argument('--ShowExploration', default=0, help='1 for exploration animation else 0')
+    Parser.add_argument('--ShowExploration', default=1, help='1 for exploration animation else 0')
     Parser.add_argument('--ShowPath', default=1, help='1 to show explored path else 0')
     Parser.add_argument('--thetaStep', default=30, help='Possibilities of action for angle')
     Parser.add_argument('--StepSize', default=2, help='Step size')
@@ -119,27 +119,40 @@ def main():
     
     ul, ur, vx, rz = get_velocities(Args, solver)
 
-    pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
+    pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
     cmd = Twist()
     msg = Twist()
-    rate = rospy.Rate(1)
-
+    rate = rospy.Rate(10)
 
     for i in range(len(vx)):
        
-        msg.linear.x = 0
-        msg.angular.z = 0 
-        start1 = time.time()
-        while(time.time() - start1 <= 5):
-            pub.publish(msg)
-        cmd.linear.x = vx[i]
-        cmd.angular.z = rz[i]
-        
-        rospy.loginfo("ul:{}, ur:{}, vx:{}, rz:{}".format(ul[i],ur[i], vx[i],rz[i]))
+        # msg.linear.x = 0
+        # msg.angular.z = 0.0
+        # start1 = time.time()
+        # while(time.time() - start1 <= 1):
+        #     pub.publish(msg)
+        # cmd.linear.x = vx[i] 
+        # if (i < 10):
+        #     cmd.angular.z = rz[i] + 0.05
+        # else:
+        #     cmd.angular.z = rz[i] - 0.05
+        rospy.loginfo("ul:{}, ur:{}, vx:{}, rz:{}".format(ul[i],ur[i], vx[i],cmd.angular.z))
         start = time.time()
-        while(time.time() - start <= 0.9):
+        counter = 0
+        while(time.time() - start <= 1.0):
+            rospy.loginfo(counter)
+            cmd.linear.x = vx[i]
+            if(rz[i] == 0.0 and counter % 2 == 0):
+                cmd.angular.z = rz[i] + 0.01
+            elif(rz[i] == 0.0 and counter % 2 == 1):
+                cmd.angular.z = rz[i] - 0.01
+            elif(rz[i] < 0):
+                cmd.angular.z = rz[i] - 0.02 
+            else:
+                cmd.angular.z = rz[i] + 0.02
             pub.publish(cmd)
-        
+            rate.sleep()
+            counter += 1
 
 if __name__ == '__main__':
     try:
