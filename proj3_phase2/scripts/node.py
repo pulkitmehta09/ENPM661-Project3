@@ -140,7 +140,7 @@ def main():
         start = time.time()
         counter = 0
         while(time.time() - start <= 1.0):
-            rospy.loginfo(counter)
+            # rospy.loginfo(counter)
             cmd.linear.x = vx[i]
             if(rz[i] == 0.0 and counter % 2 == 0):
                 cmd.angular.z = rz[i] + 0.01
