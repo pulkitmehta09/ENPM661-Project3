@@ -334,7 +334,7 @@ if __name__ == '__main__':
 	Parser.add_argument('--End', default="[9, 9, 0]", help='Goal location')
 	Parser.add_argument('--RobotRadius', default=0.177, help='Robot radius')
 	Parser.add_argument('--Clearance', default=0.1, help='Clearance')
-	Parser.add_argument('--ShowExploration', default=0, help='1 for exploration animation else 0')
+	Parser.add_argument('--ShowExploration', default=1, help='1 for exploration animation else 0')
 	Parser.add_argument('--ShowPath', default=1, help='1 to show explored path else 0')
 	Parser.add_argument('--thetaStep', default=30, help='Possibilities of action for angle')
 	Parser.add_argument('--StepSize', default=2, help='Step size')
