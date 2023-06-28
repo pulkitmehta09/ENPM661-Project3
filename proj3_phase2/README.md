@@ -23,6 +23,7 @@ $ python3 Phase2.py --Start="[1,1,30]" --End="[9,9,0]" --RPM="[10,15]"
 - Similarly the goal location can be specified using the "--End" argument.
 - The "--RPM" argument can be used to specify both the RPM values.
 
+![](https://github.com/pulkitmehta09/ENPM661-Project3/blob/main/proj3_phase2/Simulation%20Videos/output.gif)
 
 ### Gazebo Simulation
 
@@ -44,3 +45,5 @@ roslaunch proj3_phase2 proj3phase2.launch start:="[5,1,30]" end:="[3,7,0]" RPM:=
 
 ### Github Link
 https://github.com/pulkitmehta09/ENPM661-Project3/tree/main/proj3_phase2
+
+![](https://github.com/pulkitmehta09/ENPM661-Project3/blob/main/proj3_phase2/Simulation%20Videos/output_sim.gif)
